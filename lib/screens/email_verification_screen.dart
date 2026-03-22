@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-
 import '../services/auth_service.dart';
 import '../widgets/animated_text_field.dart';
 import '../widgets/gradient_button.dart';
-import 'home_screen.dart';
+import 'student/main_screen.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   final String email;
@@ -14,7 +13,8 @@ class EmailVerificationScreen extends StatefulWidget {
   });
 
   @override
-  State<EmailVerificationScreen> createState() => _EmailVerificationScreenState();
+  State<EmailVerificationScreen> createState() =>
+      _EmailVerificationScreenState();
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen>
@@ -46,7 +46,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       if (_authService.isSignedIn) {
         Navigator.of(context).pushAndRemoveUntil(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const HomeScreen(),
+            pageBuilder: (_, __, ___) => const MainScreen(),
             transitionsBuilder: (_, animation, __, child) =>
                 FadeTransition(opacity: animation, child: child),
             transitionDuration: const Duration(milliseconds: 500),
@@ -70,9 +70,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Verification code resent.'),
-          backgroundColor: const Color(0xFF311B92),
+          backgroundColor: const Color(0xFF2563EB),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)),
           margin: const EdgeInsets.all(16),
         ),
       );
@@ -88,12 +89,15 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
           children: [
             const Icon(Icons.error_outline, color: Colors.white, size: 20),
             const SizedBox(width: 10),
-            Expanded(child: Text(message, style: const TextStyle(fontSize: 13))),
+            Expanded(
+                child:
+                    Text(message, style: const TextStyle(fontSize: 13))),
           ],
         ),
         backgroundColor: const Color(0xFFD32F2F),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
       ),
     );
@@ -112,9 +116,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF2D136F),
-                  Color(0xFF311B92),
-                  Color(0xFF4A148C),
+                  Color(0xFF1a1a2e),
+                  Color(0xFF2563EB),
+                  Color(0xFF1a1a2e),
                 ],
               ),
               borderRadius: BorderRadius.only(
@@ -167,7 +171,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF311B92).withOpacity(0.12),
+                          color: const Color(0xFF2563EB).withOpacity(0.12),
                           blurRadius: 40,
                           offset: const Offset(0, 10),
                         ),
@@ -188,20 +192,21 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF2D136F),
+                              color: Color(0xFF1a1a2e),
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'We sent a verification code to:',
-                            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                            style: TextStyle(
+                                fontSize: 13, color: Colors.grey[600]),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             widget.email,
                             style: const TextStyle(
                               fontSize: 13,
-                              color: Color(0xFF311B92),
+                              color: Color(0xFF2563EB),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -215,7 +220,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                             validator: (v) {
                               final value = v?.trim() ?? '';
                               if (value.isEmpty) return 'Code is required';
-                              if (value.length < 6) return 'Enter the 6-digit code';
+                              if (value.length < 6)
+                                return 'Enter the 6-digit code';
                               return null;
                             },
                           ),
@@ -229,7 +235,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                           TextButton(
                             onPressed: _isLoading ? null : _resend,
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF311B92),
+                              foregroundColor: const Color(0xFF2563EB),
                             ),
                             child: const Text(
                               'Resend code',
@@ -249,4 +255,3 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
     );
   }
 }
-

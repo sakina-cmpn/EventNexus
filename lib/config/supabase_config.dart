@@ -1,25 +1,7 @@
 class SupabaseConfig {
-  /// Provide these via:
-  /// `flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`
-  ///
-  /// You can also override with:
-  /// `--dart-define=NEXT_PUBLIC_SUPABASE_URL=...`
-  /// `--dart-define=NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=...`
-  static const url = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: String.fromEnvironment(
-      'NEXT_PUBLIC_SUPABASE_URL',
-      defaultValue: 'https://ispbjrjfwowsmdimdbin.supabase.co',
-    ),
-  );
+  static const url = 'https://ispbjrjfwowsmdimdbin.supabase.co';
 
-  static const anonKey = String.fromEnvironment(
-    'SUPABASE_ANON_KEY',
-    defaultValue: String.fromEnvironment(
-      'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY',
-      defaultValue: 'sb_publishable_YE6pXH69dNi_AcbA0-eTMA_vey4gwD-',
-    ),
-  );
+  static const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzcGJqcmpmd293c21kaW1kYmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5OTgwNzksImV4cCI6MjA4OTU3NDA3OX0.5IPZW3NjF8MoKzUsYG8xLlgGZDKNbZITN9sJEmB3FbA';
 
   static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 }

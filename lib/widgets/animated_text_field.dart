@@ -83,14 +83,16 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
                 child: Icon(
                   widget.icon,
                   color: _isFocused
-                      ? const Color(0xFF311B92)
+                      ? const Color(0xFF2563EB)
                       : Colors.grey[400],
                   size: 20,
                 ),
               ),
               suffixIcon: widget.suffixIcon,
               labelStyle: TextStyle(
-                color: _isFocused ? const Color(0xFF311B92) : Colors.grey[400],
+                color: _isFocused
+                    ? const Color(0xFF2563EB)
+                    : Colors.grey[400],
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
@@ -99,8 +101,9 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
                 fontSize: 14,
               ),
               filled: true,
-              fillColor:
-              _isFocused ? const Color(0xFFF3E5F5) : const Color(0xFFF8F9FA),
+              fillColor: _isFocused
+                  ? const Color(0xFFEFF6FF)
+                  : const Color(0xFFF8F9FA),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide(
@@ -111,7 +114,7 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: const BorderSide(
-                  color: Color(0xFF311B92),
+                  color: Color(0xFF2563EB),
                   width: 2.0,
                 ),
               ),
@@ -130,8 +133,10 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
                 ),
               ),
               errorStyle: const TextStyle(fontSize: 11),
-              contentPadding:
-              const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal: 16,
+              ),
             ),
           );
         },

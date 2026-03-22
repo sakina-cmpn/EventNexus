@@ -4,9 +4,8 @@ import '../widgets/animated_text_field.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/wave_clipper.dart';
 import 'register_screen.dart';
-import 'home_screen.dart';
+import 'student/main_screen.dart';
 import 'forgot_password_screen.dart';
-import 'email_verification_screen.dart';
 import 'email_verification_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -93,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen>
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const HomeScreen(),
+            pageBuilder: (_, __, ___) => const MainScreen(),
             transitionsBuilder: (_, animation, __, child) =>
                 FadeTransition(opacity: animation, child: child),
             transitionDuration: const Duration(milliseconds: 500),
@@ -168,9 +167,9 @@ class _LoginScreenState extends State<LoginScreen>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xFF2D136F),
-                        Color(0xFF311B92),
-                        Color(0xFF4A148C),
+                        Color(0xFF1a1a2e),
+                        Color(0xFF2563EB),
+                        Color(0xFF1a1a2e),
                       ],
                     ),
                   ),
@@ -235,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen>
                             child: const Icon(
                               Icons.event_rounded,
                               size: 44,
-                              color: Color(0xFF311B92),
+                              color: Color(0xFF2563EB),
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -273,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen>
                         borderRadius: BorderRadius.circular(28),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF311B92).withOpacity(0.12),
+                            color: const Color(0xFF2563EB).withOpacity(0.12),
                             blurRadius: 40,
                             offset: const Offset(0, 10),
                           ),
@@ -294,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen>
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF2D136F),
+                                color: Color(0xFF1a1a2e),
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -339,7 +338,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   _obscurePassword
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
-                                  color: const Color(0xFF311B92),
+                                  color: const Color(0xFF2563EB),
                                   size: 20,
                                 ),
                               ),
@@ -365,7 +364,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     ),
                                   ),
                                   style: TextButton.styleFrom(
-                                    foregroundColor: const Color(0xFF311B92),
+                                    foregroundColor: const Color(0xFF2563EB),
                                     padding: EdgeInsets.zero,
                                     minimumSize: Size.zero,
                                     tapTargetSize:
@@ -395,7 +394,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     );
                                   },
                                   style: TextButton.styleFrom(
-                                    foregroundColor: const Color(0xFF311B92),
+                                    foregroundColor: const Color(0xFF2563EB),
                                     padding: EdgeInsets.zero,
                                     minimumSize: Size.zero,
                                     tapTargetSize:
@@ -479,7 +478,7 @@ class _LoginScreenState extends State<LoginScreen>
                         child: const Text(
                           'Create Account',
                           style: TextStyle(
-                            color: Color(0xFF311B92),
+                            color: Color(0xFF2563EB),
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
                           ),

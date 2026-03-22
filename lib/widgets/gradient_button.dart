@@ -83,50 +83,56 @@ class _GradientButtonState extends State<GradientButton>
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 colors: isBusy
-                    ? [const Color(0xFFD1C4E9), const Color(0xFFB39DDB)]
-                    : [const Color(0xFF2D136F), const Color(0xFF4A148C)],
+                    ? [
+                        const Color(0xFF93C5FD),
+                        const Color(0xFF60A5FA),
+                      ]
+                    : [
+                        const Color(0xFF1a1a2e),
+                        const Color(0xFF2563EB),
+                      ],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: _isPressed || isBusy
                   ? []
                   : [
-                BoxShadow(
-                  color: const Color(0xFF311B92).withOpacity(0.40),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+                      BoxShadow(
+                        color: const Color(0xFF2563EB).withOpacity(0.40),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
             ),
             child: Center(
               child: isBusy
                   ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2.5,
-                ),
-              )
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
                   : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.text,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          widget.text,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ],
-              ),
             ),
           ),
         ),

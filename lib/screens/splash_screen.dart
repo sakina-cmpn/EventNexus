@@ -108,9 +108,9 @@ class _SplashScreenState extends State<SplashScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF2D136F),
-              Color(0xFF311B92),
-              Color(0xFF4A148C),
+              Color(0xFF1a1a2e),
+              Color(0xFF1a1a2e),
+              Color(0xFF2563EB),
             ],
           ),
         ),
@@ -146,7 +146,7 @@ class _SplashScreenState extends State<SplashScreen>
                 height: 250,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFFB39DDB).withOpacity(0.10),
+                  color: const Color(0xFF93C5FD).withOpacity(0.10),
                 ),
               ),
             ),
@@ -158,7 +158,7 @@ class _SplashScreenState extends State<SplashScreen>
                 height: 300,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF9575CD).withOpacity(0.10),
+                  color: const Color(0xFF60A5FA).withOpacity(0.10),
                 ),
               ),
             ),
@@ -180,7 +180,7 @@ class _SplashScreenState extends State<SplashScreen>
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1F0B52).withOpacity(0.35),
+                          color: const Color(0xFF0f172a).withOpacity(0.35),
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(

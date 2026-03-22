@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../widgets/animated_text_field.dart';
 import '../widgets/gradient_button.dart';
-import 'home_screen.dart';
+import 'student/main_screen.dart';
 import 'email_verification_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -57,11 +57,13 @@ class _RegisterScreenState extends State<RegisterScreen>
     _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(_fadeController);
     _headerSlide =
         Tween<Offset>(begin: const Offset(0, -0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+          CurvedAnimation(
+              parent: _slideController, curve: Curves.easeOutCubic),
         );
     _formSlide =
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+          CurvedAnimation(
+              parent: _slideController, curve: Curves.easeOutCubic),
         );
     _checkScale = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _checkController, curve: Curves.elasticOut),
@@ -90,7 +92,8 @@ class _RegisterScreenState extends State<RegisterScreen>
     if (password.length >= 10) strength += 0.2;
     if (password.contains(RegExp(r'[A-Z]'))) strength += 0.2;
     if (password.contains(RegExp(r'[0-9]'))) strength += 0.2;
-    if (password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'))) strength += 0.2;
+    if (password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]')))
+      strength += 0.2;
     return strength;
   }
 
@@ -98,8 +101,8 @@ class _RegisterScreenState extends State<RegisterScreen>
     if (strength <= 0.2) return Colors.red;
     if (strength <= 0.4) return Colors.orange;
     if (strength <= 0.6) return Colors.yellow[700]!;
-    if (strength <= 0.8) return const Color(0xFF7E57C2);
-    return const Color(0xFF311B92);
+    if (strength <= 0.8) return const Color(0xFF2563EB);
+    return const Color(0xFF1a1a2e);
   }
 
   String _strengthLabel(double strength) {
@@ -131,7 +134,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         if (_authService.isSignedIn) {
           Navigator.of(context).pushAndRemoveUntil(
             PageRouteBuilder(
-              pageBuilder: (_, __, ___) => const HomeScreen(),
+              pageBuilder: (_, __, ___) => const MainScreen(),
               transitionsBuilder: (_, animation, __, child) =>
                   FadeTransition(opacity: animation, child: child),
               transitionDuration: const Duration(milliseconds: 500),
@@ -139,12 +142,10 @@ class _RegisterScreenState extends State<RegisterScreen>
             (route) => false,
           );
         } else {
-          // If email confirmation is enabled in Supabase, the session can be null.
-          // In that case, take the user to the OTP verification screen.
           Navigator.of(context).pushReplacement(
             PageRouteBuilder(
-              pageBuilder: (_, __, ___) =>
-                  EmailVerificationScreen(email: _emailController.text.trim()),
+              pageBuilder: (_, __, ___) => EmailVerificationScreen(
+                  email: _emailController.text.trim()),
               transitionsBuilder: (_, animation, __, child) =>
                   FadeTransition(opacity: animation, child: child),
               transitionDuration: const Duration(milliseconds: 450),
@@ -167,12 +168,14 @@ class _RegisterScreenState extends State<RegisterScreen>
             const Icon(Icons.error_outline, color: Colors.white, size: 20),
             const SizedBox(width: 10),
             Expanded(
-                child: Text(message, style: const TextStyle(fontSize: 13))),
+                child:
+                    Text(message, style: const TextStyle(fontSize: 13))),
           ],
         ),
         backgroundColor: const Color(0xFFD32F2F),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
       ),
     );
@@ -190,9 +193,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                     style: TextStyle(fontSize: 13))),
           ],
         ),
-        backgroundColor: const Color(0xFF311B92),
+        backgroundColor: const Color(0xFF2563EB),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 3),
       ),
@@ -202,7 +206,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   @override
   Widget build(BuildContext context) {
     final passwordStrength =
-    _getPasswordStrength(_passwordController.text);
+        _getPasswordStrength(_passwordController.text);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -222,9 +226,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Color(0xFF2D136F),
-                      Color(0xFF311B92),
-                      Color(0xFF4A148C),
+                      Color(0xFF1a1a2e),
+                      Color(0xFF2563EB),
+                      Color(0xFF1a1a2e),
                     ],
                   ),
                   borderRadius: BorderRadius.only(
@@ -254,7 +258,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 physics: const BouncingScrollPhysics(),
                 child: Column(
                   children: [
-                    // ── Header ─────────────────────────────────────────────
+                    // Header
                     SlideTransition(
                       position: _headerSlide,
                       child: Padding(
@@ -315,7 +319,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               ),
                               child: const Icon(
                                 Icons.event_rounded,
-                                color: Color(0xFF311B92),
+                                color: Color(0xFF2563EB),
                                 size: 28,
                               ),
                             ),
@@ -326,18 +330,20 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                     const SizedBox(height: 30),
 
-                    // ── Form Card ──────────────────────────────────────────
+                    // Form Card
                     SlideTransition(
                       position: _formSlide,
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        margin:
+                            const EdgeInsets.symmetric(horizontal: 20),
                         padding: const EdgeInsets.all(26),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF311B92).withOpacity(0.1),
+                              color: const Color(0xFF2563EB)
+                                  .withOpacity(0.1),
                               blurRadius: 40,
                               offset: const Offset(0, 8),
                             ),
@@ -351,9 +357,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                         child: Form(
                           key: _formKey,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            crossAxisAlignment:
+                                CrossAxisAlignment.stretch,
                             children: [
-                              // Full name
                               AnimatedTextField(
                                 controller: _nameController,
                                 label: 'Full Name',
@@ -370,7 +376,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                               ),
                               const SizedBox(height: 16),
 
-                              // Email
                               AnimatedTextField(
                                 controller: _emailController,
                                 label: 'Email Address',
@@ -381,7 +386,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   if (v == null || v.isEmpty)
                                     return 'Email is required';
                                   if (!RegExp(
-                                      r'^[\w-.]+@([\w-]+\.)+[\w]{2,4}$')
+                                          r'^[\w-.]+@([\w-]+\.)+[\w]{2,4}$')
                                       .hasMatch(v))
                                     return 'Enter a valid email';
                                   return null;
@@ -389,7 +394,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                               ),
                               const SizedBox(height: 16),
 
-                              // Password
                               AnimatedTextField(
                                 controller: _passwordController,
                                 label: 'Password',
@@ -399,12 +403,13 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 onChanged: (_) => setState(() {}),
                                 suffixIcon: IconButton(
                                   onPressed: () => setState(() =>
-                                  _obscurePassword = !_obscurePassword),
+                                      _obscurePassword =
+                                          !_obscurePassword),
                                   icon: Icon(
                                     _obscurePassword
                                         ? Icons.visibility_off_outlined
                                         : Icons.visibility_outlined,
-                                    color: const Color(0xFF311B92),
+                                    color: const Color(0xFF2563EB),
                                     size: 20,
                                   ),
                                 ),
@@ -417,18 +422,21 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 },
                               ),
 
-                              // Password strength indicator
-                              if (_passwordController.text.isNotEmpty) ...[
+                              if (_passwordController
+                                  .text.isNotEmpty) ...[
                                 const SizedBox(height: 10),
                                 Row(
                                   children: [
                                     Expanded(
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(4),
+                                        borderRadius:
+                                            BorderRadius.circular(4),
                                         child: LinearProgressIndicator(
                                           value: passwordStrength,
-                                          backgroundColor: Colors.grey[200],
-                                          color: _strengthColor(passwordStrength),
+                                          backgroundColor:
+                                              Colors.grey[200],
+                                          color: _strengthColor(
+                                              passwordStrength),
                                           minHeight: 5,
                                         ),
                                       ),
@@ -439,7 +447,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
-                                        color: _strengthColor(passwordStrength),
+                                        color: _strengthColor(
+                                            passwordStrength),
                                       ),
                                     ),
                                   ],
@@ -447,7 +456,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                               ],
                               const SizedBox(height: 16),
 
-                              // Confirm password
                               AnimatedTextField(
                                 controller: _confirmPasswordController,
                                 label: 'Confirm Password',
@@ -455,13 +463,13 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 icon: Icons.lock_outline_rounded,
                                 obscureText: _obscureConfirm,
                                 suffixIcon: IconButton(
-                                  onPressed: () => setState(
-                                          () => _obscureConfirm = !_obscureConfirm),
+                                  onPressed: () => setState(() =>
+                                      _obscureConfirm = !_obscureConfirm),
                                   icon: Icon(
                                     _obscureConfirm
                                         ? Icons.visibility_off_outlined
                                         : Icons.visibility_outlined,
-                                    color: const Color(0xFF311B92),
+                                    color: const Color(0xFF2563EB),
                                     size: 20,
                                   ),
                                 ),
@@ -486,33 +494,35 @@ class _RegisterScreenState extends State<RegisterScreen>
                                           : 1.0,
                                       child: GestureDetector(
                                         onTap: () {
-                                          setState(() =>
-                                          _agreeToTerms = !_agreeToTerms);
+                                          setState(() => _agreeToTerms =
+                                              !_agreeToTerms);
                                           if (_agreeToTerms) {
-                                            _checkController.forward(from: 0);
+                                            _checkController.forward(
+                                                from: 0);
                                           }
                                         },
                                         child: AnimatedContainer(
-                                          duration:
-                                          const Duration(milliseconds: 200),
+                                          duration: const Duration(
+                                              milliseconds: 200),
                                           width: 22,
                                           height: 22,
                                           decoration: BoxDecoration(
                                             color: _agreeToTerms
-                                                ? const Color(0xFF311B92)
+                                                ? const Color(0xFF2563EB)
                                                 : Colors.transparent,
                                             borderRadius:
-                                            BorderRadius.circular(6),
+                                                BorderRadius.circular(6),
                                             border: Border.all(
                                               color: _agreeToTerms
-                                                  ? const Color(0xFF311B92)
+                                                  ? const Color(0xFF2563EB)
                                                   : Colors.grey[400]!,
                                               width: 2,
                                             ),
                                           ),
                                           child: _agreeToTerms
                                               ? const Icon(Icons.check,
-                                              color: Colors.white, size: 14)
+                                                  color: Colors.white,
+                                                  size: 14)
                                               : null,
                                         ),
                                       ),
@@ -527,11 +537,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                                           color: Colors.grey[500],
                                         ),
                                         children: const [
-                                          TextSpan(text: 'I agree to the '),
+                                          TextSpan(
+                                              text: 'I agree to the '),
                                           TextSpan(
                                             text: 'Terms & Conditions',
                                             style: TextStyle(
-                                              color: Color(0xFF311B92),
+                                              color: Color(0xFF2563EB),
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -539,7 +550,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                           TextSpan(
                                             text: 'Privacy Policy',
                                             style: TextStyle(
-                                              color: Color(0xFF311B92),
+                                              color: Color(0xFF2563EB),
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -551,7 +562,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                               ),
                               const SizedBox(height: 26),
 
-                              // Register button
                               GradientButton(
                                 text: 'Create Account',
                                 isLoading: _isLoading,
@@ -565,21 +575,20 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                     const SizedBox(height: 28),
 
-                    // Sign in link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           'Already have an account? ',
-                          style:
-                          TextStyle(color: Colors.grey[500], fontSize: 14),
+                          style: TextStyle(
+                              color: Colors.grey[500], fontSize: 14),
                         ),
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
                           child: const Text(
                             'Sign In',
                             style: TextStyle(
-                              color: Color(0xFF311B92),
+                              color: Color(0xFF2563EB),
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                             ),
