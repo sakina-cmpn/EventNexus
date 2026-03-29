@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:math';
 
@@ -56,6 +57,19 @@ class EventService {
         return false;
       }
 
+      // Check if seats are still available
+      final eventData = await _supabase
+          .from('events')
+          .select('seats_left')
+          .eq('id', eventId)
+          .single();
+
+      final seatsLeft = (eventData['seats_left'] as num?)?.toInt() ?? 0;
+      if (seatsLeft <= 0) {
+        print('No seats available for this event');
+        return false;
+      }
+
       // Generate unique booking ID: EN-XXXXXX
       final bookingId = _generateBookingId();
 
@@ -91,17 +105,66 @@ class EventService {
   static Future<List<Map<String, dynamic>>> getUserRegistrations(
     String userId,
   ) async {
+    debugPrint('[EventService] Fetching registrations for user: $userId');
+
+    // Step 1: Fetch registrations for this user (simple query, no join)
+    final regsResponse = await _supabase
+        .from('registrations')
+        .select('*')
+        .eq('user_id', userId);
+
+    debugPrint('[EventService] Raw registrations count: ${(regsResponse as List).length}');
+
+    if (regsResponse.isEmpty) {
+      debugPrint('[EventService] No registrations found for user $userId');
+      return [];
+    }
+
+    // Step 2: Fetch the event for each registration individually
+    // (avoids issues with missing FK relationships for REST joins)
+    final List<Map<String, dynamic>> result = [];
+    for (final reg in regsResponse) {
+      final eventId = reg['event_id']?.toString();
+      if (eventId == null) continue;
+      try {
+        final eventResponse = await _supabase
+            .from('events')
+            .select('*')
+            .eq('id', eventId)
+            .maybeSingle();
+        result.add({
+          ...Map<String, dynamic>.from(reg),
+          'events': eventResponse,
+        });
+      } catch (e) {
+        debugPrint('[EventService] Error fetching event $eventId: $e');
+        result.add({...Map<String, dynamic>.from(reg), 'events': null});
+      }
+    }
+
+    debugPrint('[EventService] getUserRegistrations returning ${result.length} items');
+    return result;
+  }
+
+  /// Fetch all event IDs that a user is registered for.
+  ///
+  /// Used to seed the registration state on screen load so previously
+  /// registered events display the correct UI state immediately.
+  ///
+  /// Returns a [Set<String>] of event IDs, or an empty set on error.
+  static Future<Set<String>> getRegisteredEventIds(String userId) async {
     try {
       final response = await _supabase
           .from('registrations')
-          .select('*, events(*)')
-          .eq('user_id', userId)
-          .order('created_at', ascending: false);
+          .select('event_id')
+          .eq('user_id', userId);
 
-      return List<Map<String, dynamic>>.from(response);
+      return Set<String>.from(
+        (response as List).map((r) => r['event_id'].toString()),
+      );
     } catch (e) {
-      print('Error fetching user registrations: $e');
-      return [];
+      print('Error fetching registered event IDs: $e');
+      return {};
     }
   }
 
