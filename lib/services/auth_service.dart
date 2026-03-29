@@ -132,11 +132,43 @@ class AuthService {
     final meta = user.userMetadata ?? const <String, dynamic>{};
     final name =
         (meta['name'] ?? meta['full_name'] ?? meta['display_name'])?.toString();
+    final createdAt = user.createdAt.isNotEmpty
+        ? DateTime.tryParse(user.createdAt)
+        : null;
 
     return AppUser(
       id: user.id,
       email: user.email ?? '',
       name: name,
+      createdAt: createdAt,
     );
+  }
+
+  // ── UPDATE PROFILE ─────────────────────────────────────
+  /// Update the display name stored in user metadata.
+  Future<void> updateDisplayName(String name) async {
+    try {
+      await _client.auth.updateUser(
+        UserAttributes(data: {'name': name.trim()}),
+      );
+      debugPrint('[Auth] Display name updated to: $name');
+    } on AuthException catch (e) {
+      debugPrint('[Auth] updateDisplayName error: ${e.message}');
+      throw e.message;
+    }
+  }
+
+  /// Request an email change. Supabase sends a confirmation link to the new
+  /// address; the change only takes effect after the user clicks it.
+  Future<void> updateEmail(String newEmail) async {
+    try {
+      await _client.auth.updateUser(
+        UserAttributes(email: newEmail.trim()),
+      );
+      debugPrint('[Auth] Email update requested for: $newEmail');
+    } on AuthException catch (e) {
+      debugPrint('[Auth] updateEmail error: ${e.message}');
+      throw e.message;
+    }
   }
 }
