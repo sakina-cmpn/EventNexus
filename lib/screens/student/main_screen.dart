@@ -15,6 +15,9 @@ class _MainScreenState extends State<MainScreen> {
   /// Current selected tab index
   int _currentIndex = 0;
 
+  /// Incremented each time the Bookings tab is activated, so BookingsScreen reloads
+  int _bookingsRefreshKey = 0;
+
   /// PageController for instant page switching without animation
   late PageController _pageController;
 
@@ -34,6 +37,7 @@ class _MainScreenState extends State<MainScreen> {
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
+      if (index == 2) _bookingsRefreshKey++;
     });
     // Jump to page without animation
     _pageController.jumpToPage(index);
@@ -51,11 +55,11 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-        children: const [
-          HomeScreen(),
-          SearchScreen(),
-          BookingsScreen(),
-          ProfileScreen(),
+        children: [
+          HomeScreen(onProfileTapped: () => _onTabTapped(3)),
+          const SearchScreen(),
+          BookingsScreen(refreshKey: _bookingsRefreshKey),
+          const ProfileScreen(),
         ],
       ),
       // Bottom Navigation Bar

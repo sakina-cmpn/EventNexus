@@ -5,7 +5,8 @@ import 'event_detail_sheet.dart';
 import '../../services/event_service.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  final VoidCallback? onProfileTapped;
+  const HomeScreen({Key? key, this.onProfileTapped}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -15,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = 'All';
   List<Map<String, dynamic>> _events = [];
   bool _isLoading = true;
+  final Set<String> _registeredEventIds = {};
 
   final List<String> _categories = [
     'All',
@@ -32,98 +34,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadEvents() async {
     setState(() => _isLoading = true);
-    final events = await EventService.getAllEvents();
+    final user = AuthService().currentUser;
+    final futures = await Future.wait([
+      EventService.getAllEvents(),
+      if (user != null) EventService.getRegisteredEventIds(user.id),
+    ]);
+    final events = futures[0] as List<Map<String, dynamic>>;
+    final registeredIds =
+        (user != null ? futures[1] : <String>{}) as Set<String>;
     if (mounted) {
       setState(() {
-        _events = events.isNotEmpty ? events : _getFallbackEvents();
+        _events = events;
+        _registeredEventIds
+          ..clear()
+          ..addAll(registeredIds);
         _isLoading = false;
       });
     }
-  }
-
-  List<Map<String, dynamic>> _getFallbackEvents() {
-    return [
-      {
-        'title': 'Tech Workshop',
-        'description': 'CS Seminar',
-        'category': 'Workshop',
-        'status': 'Upcoming',
-        'date': '12 Feb, 2PM',
-        'venue': 'Auditorium A',
-        'price': 50,
-        'seats': '50/100',
-      },
-      {
-        'title': 'Cultural Fest',
-        'description': 'Dance Competition',
-        'category': 'Cultural',
-        'status': 'Upcoming',
-        'date': '15 Feb, 6PM',
-        'venue': 'Main Hall',
-        'price': 0,
-        'seats': '120/200',
-      },
-      {
-        'title': 'Sports Day',
-        'description': 'Football Match',
-        'category': 'Sports',
-        'status': 'Ongoing',
-        'date': '20 Feb, 4PM',
-        'venue': 'Sports Ground',
-        'price': 0,
-        'seats': '75/200',
-      },
-      {
-        'title': 'Hackathon 2025',
-        'description': '24hr Coding Challenge',
-        'category': 'Hackathon',
-        'status': 'Upcoming',
-        'date': '18 Feb, 9AM',
-        'venue': 'Tech Block',
-        'price': 100,
-        'seats': '30/50',
-      },
-      {
-        'title': 'Music Night',
-        'description': 'Annual Cultural Show',
-        'category': 'Cultural',
-        'status': 'Upcoming',
-        'date': '22 Feb, 7PM',
-        'venue': 'Open Air Theatre',
-        'price': 0,
-        'seats': '200/300',
-      },
-      {
-        'title': 'AI Workshop',
-        'description': 'Machine Learning Basics',
-        'category': 'Workshop',
-        'status': 'Upcoming',
-        'date': '25 Feb, 11AM',
-        'venue': 'Lab 3',
-        'price': 75,
-        'seats': '20/40',
-      },
-      {
-        'title': 'Cricket Match',
-        'description': 'Inter Department Tournament',
-        'category': 'Sports',
-        'status': 'Ongoing',
-        'date': '28 Feb, 10AM',
-        'venue': 'Ground B',
-        'price': 0,
-        'seats': '50/100',
-      },
-      {
-        'title': 'Web Dev Bootcamp',
-        'description': 'Full Stack Development',
-        'category': 'Hackathon',
-        'status': 'Upcoming',
-        'date': '5 Mar, 10AM',
-        'venue': 'Computer Lab',
-        'price': 200,
-        'seats': '15/30',
-      },
-    ];
   }
 
   List<Map<String, dynamic>> get _filteredEvents {
@@ -297,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 onSelected: (String value) {
                   if (value == 'profile') {
-                    // TODO: Navigate to profile page
+                    widget.onProfileTapped?.call();
                   } else if (value == 'signout') {
                     _handleSignOut();
                   }
@@ -638,12 +565,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 32,
                       child: OutlinedButton(
                         onPressed: () {
+                          final eventId = event['id']?.toString() ?? '';
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-                            builder: (_) =>
-                                EventDetailSheet(event: event),
+                            builder: (_) => EventDetailSheet(
+                              event: event,
+                              onRegistrationSuccess: () {
+                                if (mounted) {
+                                  setState(() => _registeredEventIds.add(eventId));
+                                }
+                              },
+                            ),
                           );
                         },
                         style: OutlinedButton.styleFrom(
@@ -668,17 +602,49 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    if (isFree)
+                    if (_registeredEventIds.contains(event['id']?.toString() ?? ''))
+                      Container(
+                        height: 32,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFdcfce7),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.check_circle, size: 14, color: Color(0xFF16a34a)),
+                            SizedBox(width: 4),
+                            Text(
+                              'Registered',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF16a34a),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else if (isFree)
                       SizedBox(
                         height: 32,
                         child: ElevatedButton(
                           onPressed: () {
+                            final eventId = event['id']?.toString() ?? '';
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
-                              builder: (_) =>
-                                  EventDetailSheet(event: event),
+                              builder: (_) => EventDetailSheet(
+                                event: event,
+                                onRegistrationSuccess: () {
+                                  if (mounted) {
+                                    setState(() => _registeredEventIds.add(eventId));
+                                  }
+                                },
+                              ),
                             );
                           },
                           style: ElevatedButton.styleFrom(

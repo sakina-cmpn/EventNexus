@@ -1,15 +1,15 @@
-import 'package:eventnexus/services/auth_service.dart';
-import 'package:eventnexus/services/event_service.dart';
 import 'package:flutter/material.dart';
 import '../../services/event_service.dart';
 import '../../services/auth_service.dart';
 
 class EventDetailSheet extends StatefulWidget {
   final Map<String, dynamic> event;
+  final VoidCallback? onRegistrationSuccess;
 
   const EventDetailSheet({
     Key? key,
     required this.event,
+    this.onRegistrationSuccess,
   }) : super(key: key);
 
   @override
@@ -104,6 +104,7 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
         _isRegistering = false;
         if (success) _isAlreadyRegistered = true;
       });
+      if (success) widget.onRegistrationSuccess?.call();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -122,14 +123,27 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
     return widget.event['status']?.toString().toLowerCase() == 'ongoing';
   }
 
-  /// Parse seats from "50/100" format
+  /// Get available seats from Supabase seats_left / total_seats fields
   String _getAvailableSeats() {
-    final seats = widget.event['seats']?.toString() ?? '0/0';
-    final parts = seats.split('/');
-    if (parts.length == 2) {
+    final seatsLeft = widget.event['seats_left'];
+    final totalSeats = widget.event['total_seats'];
+    if (seatsLeft != null && totalSeats != null) {
+      return '$seatsLeft of $totalSeats available';
+    }
+    // Fallback for legacy string format
+    final seats = widget.event['seats']?.toString() ?? '';
+    if (seats.contains('/')) {
+      final parts = seats.split('/');
       return '${parts[0]} of ${parts[1]} available';
     }
-    return seats;
+    return 'N/A';
+  }
+
+  /// Returns true when no seats are left
+  bool _isSeatsFull() {
+    final seatsLeft = widget.event['seats_left'];
+    if (seatsLeft == null) return false;
+    return (seatsLeft as num).toInt() <= 0;
   }
 
   @override
@@ -253,7 +267,7 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
                   _buildInfoRow(
                     icon: Icons.person_outline,
                     label: 'Organizer',
-                    value: 'College Department',
+                    value: widget.event['organizer']?.toString() ?? 'College Department',
                   ),
                   const SizedBox(height: 20),
                   // Divider
@@ -336,7 +350,27 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
                   ],
                 ),
                 // Register button with multiple states
-                if (_isOngoing())
+                if (_isSeatsFull() && !_isAlreadyRegistered)
+                  // Seats full - show disabled button
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Seats Full',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
+                else if (_isOngoing())
                   // Ongoing event - show closed button
                   Container(
                     padding: const EdgeInsets.symmetric(
