@@ -2,6 +2,7 @@
 import '../../services/auth_service.dart';
 import '../../services/event_service.dart';
 import '../login_screen.dart';
+import '../admin/admin_dashboard_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -629,19 +630,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildSignOutButton() {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: OutlinedButton(
-        onPressed: _handleSignOut,
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: redError, width: 1.5),
-          minimumSize: const Size(double.infinity, 48),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: const Text('Sign Out',
-            style: TextStyle(
-                color: redError,
-                fontSize: 14,
-                fontWeight: FontWeight.w600)),
+      child: Column(
+        children: [
+          // Admin Panel Button (only for admin user)
+          if (_email.toLowerCase() == 'fullsd206@gmail.com')
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      PageRouteBuilder(
+                        pageBuilder: (_, __, ___) => const AdminDashboardScreen(),
+                        transitionsBuilder: (_, animation, __, child) =>
+                            FadeTransition(opacity: animation, child: child),
+                        transitionDuration: const Duration(milliseconds: 400),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.admin_panel_settings, size: 20),
+                  label: const Text(
+                    'Admin Dashboard',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1a1a2e),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          // Sign Out Button
+          OutlinedButton(
+            onPressed: _handleSignOut,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: redError, width: 1.5),
+              minimumSize: const Size(double.infinity, 48),
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Sign Out',
+                style: TextStyle(
+                    color: redError,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600)),
+          ),
+        ],
       ),
     );
   }

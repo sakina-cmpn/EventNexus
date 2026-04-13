@@ -5,6 +5,7 @@ import '../widgets/gradient_button.dart';
 import '../widgets/wave_clipper.dart';
 import 'register_screen.dart';
 import 'student/main_screen.dart';
+import 'admin/admin_dashboard_screen.dart';
 import 'forgot_password_screen.dart';
 import 'email_verification_screen.dart';
 
@@ -85,14 +86,19 @@ class _LoginScreenState extends State<LoginScreen>
     setState(() => _isLoading = true);
 
     try {
-      await _authService.signInWithEmailAndPassword(
+      final user = await _authService.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
-      if (mounted) {
+
+      if (mounted && user != null) {
+        // Check if admin email - redirect to Admin Dashboard
+        final isAdmin = user.email.toLowerCase() == 'fullsd206@gmail.com';
+
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const MainScreen(),
+            pageBuilder: (_, __, ___) =>
+                isAdmin ? const AdminDashboardScreen() : const MainScreen(),
             transitionsBuilder: (_, animation, __, child) =>
                 FadeTransition(opacity: animation, child: child),
             transitionDuration: const Duration(milliseconds: 500),
