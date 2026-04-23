@@ -1,111 +1,123 @@
-# EventNexus 🎫
-### College Event Management System
-**Shree LR Tiwari College of Engineering**
+<div align="center">
+
+<img src="assets/images/logo.png" alt="EventNexus Logo" width="120" height="120" />
+
+# EventNexus
+
+**A production-grade college event management platform built with Flutter & Supabase.**
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-Powered-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+[Features](#-features) · [Tech Stack](#-tech-stack) · [Architecture](#-architecture) · [Database](#-database-design) · [Setup](#-local-installation) · [Roadmap](#-roadmap)
+
+</div>
 
 ---
 
-## 👥 Team
+## Overview
 
-| Name | Role |
-|------|------|
-| Monish Sharma | Team Lead & Flutter Developer |
-| Sakina Rizvi | Flutter Developer (Auth & UI) |
-| Akshat Sabnis | Flutter Developer |
-| Shashank Sharma | Flutter Developer |
+EventNexus is a full-featured college event management app that provides role-aware experiences for students and administrators. Students can discover, search, and register for events, while admins get a powerful dashboard with analytics, event CRUD operations, and registration management — all backed by a real-time Supabase Postgres database with Row Level Security.
 
 ---
 
-## 📱 About the Project
+## ✨ Features
 
-EventNexus is a mobile application built for college students and administrators to manage, discover, and register for college events. It solves problems like scattered announcements, missed updates, and manual registrations by providing a centralized platform.
+### 🎓 Student Experience
+| Feature | Description |
+|---|---|
+| **Event Discovery** | Browse events by category with rich cards and custom animations |
+| **Search** | Live, real-time search and filtering across all events |
+| **Event Registration** | One-tap registration with auto-generated booking IDs |
+| **Bookings** | View, refresh, and inspect all personal bookings |
+| **Profile** | Update display name and email from within the app |
+| **Navigation** | Smooth `PageView + BottomNavigationBar` for instant tab switching |
+
+### 🛠️ Admin Experience
+| Feature | Description |
+|---|---|
+| **Dashboard** | Analytics cards: event counts, registrations, seat occupancy, upcoming events |
+| **Event Management** | Full Create / Update / Delete flow via service layer |
+| **Registration Viewer** | Search and inspect registrations per event |
+| **Analytics Screen** | Deep insights by category, status, and activity |
+| **Unified Navigation** | Admin dashboard integrates student tabs via bottom navigation |
+
+### 🔐 Authentication
+- Email/password sign-up and login via Supabase Auth
+- Email OTP verification with resend support
+- Forgot password flow
+- Secure sign-out from all student screens
 
 ---
 
-## 🧱 Tech Stack
+## 🧰 Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Mobile App | Flutter (Dart) |
-| Backend / Database | Supabase |
-| Authentication | Supabase Auth (Email + OTP verification) |
-| Admin Panel | React + Vite + Tailwind CSS (coming soon) |
+|---|---|
+| **Framework** | Flutter (Dart) |
+| **Backend & Database** | Supabase (Postgres + RLS) |
+| **Authentication** | Supabase Auth |
+| **Image Loading** | `cached_network_image ^3.3.1` |
+| **Video** | `video_player ^2.8.5` |
+| **Internationalization** | `intl ^0.19.0` |
+| **Supabase SDK** | `supabase_flutter ^2.8.4` |
 
 ---
 
-## ✅ What Has Been Built So Far
+## 🏗️ Architecture
 
-### Splash Screen
-- [x] Animated logo splash with ripple effect
-- [x] Smooth fade transition to Login screen
-- [x] Professional dark navy + blue gradient background
+EventNexus follows a clean **Screen → Service → Model** layering pattern that keeps Supabase logic centralized and UI code lean and maintainable.
 
-### Login Screen
-- [x] Animated wave header
-- [x] Email and password fields with validation
-- [x] Show/hide password toggle
-- [x] Forgot password link
-- [x] Verify email link
-- [x] Navigate to Register screen
-- [x] Error handling with SnackBar
+```
+┌─────────────────────────────────────┐
+│             screens/                │  UI composition, form validation,
+│   (student/ and admin/)             │  navigation, user interactions
+└────────────────┬────────────────────┘
+                 │ calls
+┌────────────────▼────────────────────┐
+│             services/               │  Supabase read/write, auth wrappers,
+│  auth · event · admin               │  payload building, fallback logic
+└────────────────┬────────────────────┘
+                 │ returns
+┌────────────────▼────────────────────┐
+│          models/ + config/          │  AppUser model, Supabase config,
+│                                     │  admin email allowlist
+└─────────────────────────────────────┘
+```
 
-### Register Screen
-- [x] Full name, email, password, confirm password fields
-- [x] Password strength indicator
-- [x] Terms and Conditions checkbox
-- [x] Saves user to Supabase Auth on register
-- [x] Routes to Email Verification if email confirmation enabled
-
-### Email Verification Screen
-- [x] OTP input field
-- [x] Verify email with Supabase OTP
-- [x] Resend OTP option
-- [x] Routes to Home on success
-
-### Forgot Password Screen
-- [x] Email input field
-- [x] Sends password reset link via Supabase
-- [x] Success state with confirmation message
-
-### Home Screen (Student)
-- [x] Top bar with logo, notification bell, user dropdown
-- [x] User dropdown with My Profile and Sign Out
-- [x] Sign Out working and routes back to Login
-- [x] Category tabs (All, Workshops, Hackathons, Cultural, Sports)
-- [x] Category filter working
-- [x] Banner with Unsplash event image
-- [x] Event cards with title, category badge, status dot, date, venue
-- [x] Free events show Details + Register button
-- [x] Paid events show Details button only
-- [x] Bottom navigation (Home, Search, Bookings, Profile)
-
-### Navigation
-- [x] Bottom navigation bar with 4 tabs
-- [x] PageView for instant tab switching
-- [x] Placeholder screens for Search, Bookings, Profile
-
----
-
-## 🗂️ Folder Structure
+### Folder Structure
 
 ```
 lib/
 ├── main.dart
 ├── config/
-│   └── supabase_config.dart
+│   ├── admin_access.dart          # Admin email allowlist
+│   └── supabase_config.dart       # Supabase URL + anon key
 ├── models/
 │   └── app_user.dart
 ├── services/
-│   └── auth_service.dart
+│   ├── admin_service.dart         # Admin reads/writes
+│   ├── auth_service.dart          # Auth wrappers
+│   └── event_service.dart         # Event CRUD
 ├── screens/
 │   ├── splash_screen.dart
 │   ├── login_screen.dart
 │   ├── register_screen.dart
 │   ├── email_verification_screen.dart
 │   ├── forgot_password_screen.dart
+│   ├── admin/
+│   │   ├── admin_dashboard_screen.dart
+│   │   ├── analytics_screen.dart
+│   │   ├── create_event_screen.dart
+│   │   ├── event_registrations_screen.dart
+│   │   └── manage_events_screen.dart
 │   └── student/
 │       ├── main_screen.dart
 │       ├── home_screen.dart
 │       ├── search_screen.dart
+│       ├── event_detail_sheet.dart
 │       ├── bookings_screen.dart
 │       └── profile_screen.dart
 └── widgets/
@@ -113,130 +125,228 @@ lib/
     ├── eventnexus_logo.dart
     ├── gradient_button.dart
     └── wave_clipper.dart
+
+assets/
+├── images/
+└── videos/
 ```
 
 ---
 
-## 🗄️ Supabase Setup
+## 🗄️ Database Design
 
-### Authentication
-- Email and Password auth enabled
-- Email OTP verification enabled
-- Password reset via email enabled
+### `events`
 
-### Database Collections (Coming Soon)
-```
-events
-  id          — uuid
-  title       — string
-  description — string
-  category    — string
-  date        — timestamp
-  venue       — string
-  price       — number
-  totalSeats  — number
-  seatsLeft   — number
-  status      — string (Upcoming / Ongoing / Completed)
-  imageUrl    — string
-  createdAt   — timestamp
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | Primary key |
+| `title` | `text` | |
+| `description` | `text` | |
+| `category` | `text` | |
+| `date` | `timestamptz` | App sends ISO 8601 |
+| `venue` | `text` | |
+| `price` | `int4` / `numeric` | |
+| `total_seats` | `int4` | |
+| `seats_left` | `int4` | |
+| `status` | `text` | e.g. `upcoming`, `ongoing`, `past` |
+| `image_url` | `text` | Public URL |
+| `organizer` | `text` | |
+| `created_at` | `timestamptz` | |
 
-registrations
-  id           — uuid
-  userId       — uuid
-  eventId      — uuid
-  bookingId    — string
-  registeredAt — timestamp
-  status       — string
-```
+### `registrations`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | Primary key |
+| `booking_id` | `text` | Auto-generated |
+| `user_id` | `uuid` | From Supabase Auth |
+| `event_id` | `uuid` | FK → `events.id` |
+| `user_email` | `text` | |
+| `user_name` | `text` | |
+| `registered_at` | `timestamptz` | |
+| `status` | `text` | e.g. `confirmed` |
 
 ---
 
-## 🚀 How to Run This Project
+## 🔑 Authentication & Roles
 
-### Step 1 — Prerequisites
-Make sure you have these installed:
-- Flutter SDK (latest stable)
-- Android Studio
-- VS Code with Flutter and Dart extensions
-- Java JDK 17
+### Role Model
 
-### Step 2 — Clone the Repository
+Admin access is currently controlled via an **email allowlist** in `lib/config/admin_access.dart`:
+
+```dart
+static const Set<String> _adminEmails = {
+  'admin@yourdomain.com',
+};
+```
+
+### Navigation Behavior
+
+```
+Login
+ ├── Standard user  →  Student tabs (Home · Search · Bookings · Profile)
+ └── Admin user     →  Admin dashboard + student tabs via bottom nav
+```
+
+> ⚠️ **Note:** The email allowlist is a temporary approach. The roadmap includes migrating to a proper `roles` table. For production, **never rely solely on client-side role checks** — enforce admin access via Supabase RLS policies using `auth.jwt()`.
+
+---
+
+## ⚙️ Supabase Setup
+
+1. Create a Supabase project at [supabase.com](https://supabase.com).
+2. Enable **Email/Password** auth under Authentication → Providers.
+3. Enable **Email OTP verification** if required by your environment.
+4. Create the `events` and `registrations` tables using the schema above.
+5. Add a foreign key: `registrations.event_id` → `events.id`.
+6. Enable RLS and apply policies (see [RLS Policy Guidance](#-rls-policy-guidance)).
+
+### Configure Project Keys
+
+Edit `lib/config/supabase_config.dart`:
+
+```dart
+class SupabaseConfig {
+  static const url = 'YOUR_SUPABASE_URL';
+  static const anonKey = 'YOUR_SUPABASE_ANON_KEY';
+}
+```
+
+> `main.dart` checks `SupabaseConfig.isConfigured` at startup. If the values are empty, the app shows a fallback configuration screen rather than crashing.
+
+---
+
+## 💻 Local Installation
+
+### Prerequisites
+
+- Flutter SDK (stable channel)
+- Dart SDK (compatible with your Flutter version)
+- Android Studio **or** VS Code with Flutter/Dart extensions
+- Xcode (required for iOS/macOS builds on macOS)
+- JDK 17 (recommended for Android builds)
+
+### Steps
+
 ```bash
-git clone https://github.com/sakina-cmpn/EventNexus.git
+# 1. Clone the repository
+git clone <your-repo-url>
 cd EventNexus
-```
 
-### Step 3 — Install Dependencies
-```bash
+# 2. Install Flutter dependencies
 flutter pub get
-```
 
-### Step 4 — Android Setup
-Make sure these files exist in your project (copy from a working Flutter project if missing):
-- `android/app/src/main/AndroidManifest.xml`
-- `android/app/src/main/java/com/example/eventnexus/MainActivity.kt`
-- `android/gradle.properties`
+# 3. Configure Supabase credentials
+#    Edit lib/config/supabase_config.dart
+#    Edit lib/config/admin_access.dart
 
-### Step 5 — Run the App
-Connect an Android device or start an emulator, then:
-```bash
+# 4. Run static analysis
+flutter analyze
+
+# 5. Launch the app
 flutter run
 ```
 
 ---
 
-## 🗺️ What's Coming Next
+## 🚀 Run & Build
 
-### Student App
-- [ ] Event Detail bottom sheet (floating panel)
-- [ ] Booking / Registration system
-- [ ] Search screen with filters
-- [ ] Bookings screen (My tickets with Booking ID)
-- [ ] Profile screen
-- [ ] Real events fetched from Supabase
+```bash
+# Run in development
+flutter run
 
-### Admin Panel (React Web App)
-- [ ] Admin login
-- [ ] Create / Edit / Delete events
-- [ ] View registrations per event
-- [ ] Track attendance
-- [ ] Analytics dashboard
+# List connected devices
+flutter devices
 
-### Advanced Features
-- [ ] Push notifications
-- [ ] Payment simulation
-- [ ] Event reminders
-- [ ] AI feedback analysis
+# Run on a specific device
+flutter run -d <device_id>
 
----
+# Build release APK
+flutter build apk --release
 
-## ⚠️ Important Rules for Team
-
-1. Always create your own branch — never push directly to main
-2. Ask Monish before making changes to:
-   - `main.dart`
-   - `auth_service.dart`
-   - `supabase_config.dart`
-   - `pubspec.yaml`
-3. Always run `flutter pub get` after pulling new changes
-4. Always test on your device before saying something is done
-5. Commit after every working feature with a clear message
-
-## 📝 Git Commit Message Format
-```
-feat: add event detail bottom sheet
-fix: resolve sign out navigation bug
-ui: update home screen banner design
-refactor: clean up auth service
+# Build release App Bundle (recommended for Play Store)
+flutter build appbundle --release
 ```
 
 ---
 
-## 📞 Contact
+## 🔒 RLS Policy Guidance
 
-For Supabase access or any issues contact:
-**Monish Sharma** — 9372962545
-GitHub: [@MonishSharma01](https://github.com/MonishSharma01)
+If you see:
+```
+new row violates row-level security policy for table "events"
+```
 
-**Sakina Rizvi** — Auth & UI
-GitHub: [@sakina-cmpn](https://github.com/sakina-cmpn)
+Apply the following RLS policies in your Supabase SQL editor:
+
+```sql
+-- Allow all authenticated users to read events
+CREATE POLICY "events_select_authenticated"
+ON public.events FOR SELECT
+TO authenticated
+USING (true);
+
+-- Allow admin emails to insert events
+CREATE POLICY "events_insert_admin"
+ON public.events FOR INSERT
+TO authenticated
+WITH CHECK (
+  auth.jwt() ->> 'email' IN ('admin@yourdomain.com')
+);
+
+-- Allow admin emails to update events
+CREATE POLICY "events_update_admin"
+ON public.events FOR UPDATE
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('admin@yourdomain.com'))
+WITH CHECK (auth.jwt() ->> 'email' IN ('admin@yourdomain.com'));
+
+-- Allow admin emails to delete events
+CREATE POLICY "events_delete_admin"
+ON public.events FOR DELETE
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('admin@yourdomain.com'));
+```
+
+**Best practices:**
+- Store policies in a versioned SQL migrations folder for team consistency.
+- Never rely solely on client-side admin checks — always enforce access at the database level.
+- Rotate your anon key and service role key regularly.
+
+---
+
+## 🛠️ Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+|---|---|---|
+| **"Supabase not configured" screen on launch** | Empty URL or anon key | Check `lib/config/supabase_config.dart` |
+| **OTP verification doesn't proceed** | OTP not enabled in Supabase | Enable Email OTP under Auth → Settings |
+| **Event create fails with RLS error** | Missing or misconfigured insert policy | Apply the `events_insert_admin` policy above; confirm email is in allowlist |
+| **Bookings not loading** | Missing RLS select policy on `registrations` | Add a select policy for authenticated users; verify `event_id` FK is valid |
+| **Images not rendering** | Invalid or non-public `image_url` | Confirm URLs are publicly accessible; check network permissions |
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Migrate admin role checks from email allowlist to a proper `roles` table
+- [ ] Add versioned SQL migrations folder for schema management
+- [ ] Wire up delete flow in the Manage Events UI (service support is ready)
+- [ ] Add unit and widget test coverage for services and auth/navigation flows
+- [ ] Set up CI pipeline (`flutter analyze`, tests, release build smoke checks)
+- [ ] Push notifications for event reminders and booking confirmations
+- [ ] QR code-based check-in for event entry
+
+---
+
+## 📄 Additional Documentation
+
+Want to go deeper? The following companion documents can be generated on request:
+
+| Document | Contents |
+|---|---|
+| `SUPABASE_SETUP.md` | Complete SQL for tables, indexes, RLS policies, and RPC functions |
+| `CONTRIBUTING.md` | Branching strategy, commit conventions, and review standards |
+| `SECURITY.md` | API key handling, secrets management, and RLS best practices |
+
+---
