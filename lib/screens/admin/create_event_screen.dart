@@ -423,12 +423,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel('Price (₹)'),
+                              _buildLabel('Price (Ã¢â€šÂ¹)'),
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: _priceController,
                                 keyboardType: TextInputType.number,
-                                decoration: _inputDecoration('0 for free', Icons.attach_money),
+                                decoration: _inputDecoration('0 for free', Icons.currency_rupee),
                                 validator: (v) {
                                   if (v == null || v.isEmpty) return null;
                                   if (num.tryParse(v) == null) return 'Invalid number';

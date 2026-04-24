@@ -502,7 +502,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(width: 6),
                 const Text(
-                  '·',
+                  'Â·',
                   style: TextStyle(
                     fontSize: 12,
                     color: Color(0xFF9CA3AF),
@@ -518,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(width: 6),
                 const Text(
-                  '·',
+                  'Â·',
                   style: TextStyle(
                     fontSize: 12,
                     color: Color(0xFF9CA3AF),

@@ -356,7 +356,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen>
                     const SizedBox(width: 6),
                     Text(
                       dateTime != null
-                          ? DateFormat('MMM dd, yyyy • h:mm a').format(dateTime)
+                          ? DateFormat('MMM dd, yyyy · h:mm a').format(dateTime)
                           : 'Date TBA',
                       style: const TextStyle(
                         fontSize: 12,
@@ -401,7 +401,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen>
                       child: Row(
                         children: [
                           Icon(
-                            Icons.attach_money,
+                            Icons.currency_rupee,
                             size: 14,
                             color: price == 0 ? greenSuccess : orangeAccent,
                           ),

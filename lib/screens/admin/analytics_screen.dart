@@ -162,7 +162,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.attach_money, color: Colors.white, size: 24),
+                child: const Icon(Icons.currency_rupee, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 12),
               const Column(
