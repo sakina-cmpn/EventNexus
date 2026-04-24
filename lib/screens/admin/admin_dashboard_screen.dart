@@ -3,6 +3,7 @@ import '../../services/admin_service.dart';
 import 'create_event_screen.dart';
 import 'manage_events_screen.dart';
 import 'analytics_screen.dart';
+import '../student/main_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -29,6 +30,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   int _ongoingEvents = 0;
   int _totalSeats = 0;
   int _filledSeats = 0;
+  static const int _adminTabIndex = 4;
 
   @override
   void initState() {
@@ -64,6 +66,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       debugPrint('[AdminDashboard] Error loading stats: $e');
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _onBottomNavTap(int index) {
+    if (index == _adminTabIndex) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => MainScreen(initialIndex: index),
+        transitionsBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+      (route) => false,
+    );
   }
 
   @override
@@ -134,6 +149,55 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 ),
               ),
             ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Colors.grey[200] ?? const Color(0xFFF0F0F0),
+              width: 0.5,
+            ),
+          ),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _adminTabIndex,
+          onTap: _onBottomNavTap,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w400,
+          ),
+          selectedLabelStyle: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+          selectedItemColor: const Color(0xFF2563EB),
+          unselectedItemColor: const Color(0xFF9CA3AF),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search_rounded),
+              label: 'Search',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month_rounded),
+              label: 'Bookings',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings),
+              label: 'Admin',
+            ),
+          ],
+        ),
+      ),
     );
   }
 

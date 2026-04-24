@@ -262,7 +262,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(
-          color: gray400.withValues(alpha: 0.2),
+          color: gray400.withOpacity(0.2),
           width: 1,
         ),
         borderRadius: BorderRadius.circular(12),
@@ -327,7 +327,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          Divider(color: gray400.withValues(alpha: 0.2), thickness: 1),
+          Divider(color: gray400.withOpacity(0.2), thickness: 1),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -607,7 +607,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                           _detailRow(Icons.access_time_rounded, 'Registered On', registeredDisplay),
                         ],
                       const SizedBox(height: 20),
-                      Divider(color: gray400.withValues(alpha: 0.25)),
+                      Divider(color: gray400.withOpacity(0.25)),
                       const SizedBox(height: 16),
                       const Text(
                         'About this event',
@@ -636,7 +636,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                 decoration: BoxDecoration(
                   border: Border(
-                    top: BorderSide(color: gray400.withValues(alpha: 0.15)),
+                    top: BorderSide(color: gray400.withOpacity(0.15)),
                   ),
                 ),
                 child: Row(

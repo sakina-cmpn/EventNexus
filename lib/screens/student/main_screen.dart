@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../config/admin_access.dart';
 import './home_screen.dart';
 import './search_screen.dart';
 import './bookings_screen.dart';
@@ -7,7 +8,9 @@ import './profile_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  final int initialIndex;
+
+  const MainScreen({Key? key, this.initialIndex = 0}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -26,12 +29,15 @@ class _MainScreenState extends State<MainScreen> {
   /// Check if current user is admin
   bool get _isAdmin {
     final email = AuthService().currentUser?.email ?? '';
-    return email.toLowerCase() == 'fullsd206@gmail.com';
+    return AdminAccess.isAdminEmail(email);
   }
 
   @override
   void initState() {
     super.initState();
+    final isAdmin = _isAdmin;
+    final maxIndex = isAdmin ? 4 : 3;
+    _currentIndex = widget.initialIndex.clamp(0, maxIndex).toInt();
     _pageController = PageController(initialPage: _currentIndex);
   }
 

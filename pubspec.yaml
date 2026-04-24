@@ -15,8 +15,8 @@ dependencies:
 
   cupertino_icons: ^1.0.2
   supabase_flutter: ^2.8.4
-  video_player: ^2.11.1
-  cached_network_image: ^3.4.1
+  video_player: ^2.8.5
+  cached_network_image: ^3.3.1
   flutter_launcher_icons: ^0.13.1
   intl: ^0.19.0
 

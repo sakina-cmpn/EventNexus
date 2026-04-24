@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../services/event_service.dart';
+import '../../config/admin_access.dart';
 import '../login_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
 
@@ -458,7 +459,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.6)),
+                      Border.all(color: Colors.white.withOpacity(0.6)),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Text(
@@ -512,7 +513,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.07),
+            color: Colors.black.withOpacity(0.07),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -633,7 +634,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           // Admin Panel Button (only for admin user)
-          if (_email.toLowerCase() == 'fullsd206@gmail.com')
+          if (AdminAccess.isAdminEmail(_email))
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: SizedBox(

@@ -143,17 +143,31 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _selectedTime.minute,
     );
 
-    final success = await AdminService.createEvent(
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
-      category: _selectedCategory,
-      date: eventDateTime,
-      venue: _venueController.text.trim(),
-      price: num.tryParse(_priceController.text) ?? 0,
-      totalSeats: int.tryParse(_totalSeatsController.text) ?? 0,
-      imageUrl: _imageUrlController.text.trim(),
-      status: _selectedStatus,
-    );
+    final isEdit = widget.eventData != null;
+    final success = isEdit
+        ? await AdminService.updateEvent(
+            eventId: (widget.eventData?['id'] ?? '').toString(),
+            title: _titleController.text.trim(),
+            description: _descriptionController.text.trim(),
+            category: _selectedCategory,
+            date: eventDateTime,
+            venue: _venueController.text.trim(),
+            price: num.tryParse(_priceController.text) ?? 0,
+            totalSeats: int.tryParse(_totalSeatsController.text) ?? 0,
+            imageUrl: _imageUrlController.text.trim(),
+            status: _selectedStatus,
+          )
+        : await AdminService.createEvent(
+            title: _titleController.text.trim(),
+            description: _descriptionController.text.trim(),
+            category: _selectedCategory,
+            date: eventDateTime,
+            venue: _venueController.text.trim(),
+            price: num.tryParse(_priceController.text) ?? 0,
+            totalSeats: int.tryParse(_totalSeatsController.text) ?? 0,
+            imageUrl: _imageUrlController.text.trim(),
+            status: _selectedStatus,
+          );
 
     if (mounted) {
       setState(() => _isSubmitting = false);
@@ -162,23 +176,28 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Event created successfully!'),
+            content: Text(
+              isEdit
+                  ? 'Event updated successfully!'
+                  : 'Event created successfully!',
+            ),
             backgroundColor: greenSuccess,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       } else {
-        // Show TODO dialog for teammate
+        final errorText =
+            AdminService.lastErrorMessage ?? 'Unknown database error';
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: Row(
               children: [
-                const Icon(Icons.info_outline, color: primaryBlue),
+                const Icon(Icons.error_outline, color: Colors.redAccent),
                 const SizedBox(width: 10),
-                const Text('Backend Required'),
+                Text(isEdit ? 'Could Not Update Event' : 'Could Not Create Event'),
               ],
             ),
             content: Column(
@@ -186,40 +205,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'The Create Event feature requires Supabase write access.',
+                  'The event could not be saved in the events table.',
                   style: TextStyle(fontSize: 13),
                 ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: primaryBlue.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: primaryBlue.withOpacity(0.2)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Teammate: Uncomment the insert code in:',
-                        style: TextStyle(fontSize: 11, color: gray600),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'lib/services/admin_service.dart',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: primaryBlue,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'AdminService.createEvent() method',
-                        style: TextStyle(fontSize: 10, color: gray400),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 8),
+                Text(
+                  errorText,
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
                 ),
               ],
             ),
@@ -575,7 +567,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Backend Integration Required',
+                          'Supabase Connected',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -584,7 +576,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Teammate: Connect this form to Supabase insert/update in admin_service.dart',
+                          'Create Event writes directly to the events table.',
                           style: TextStyle(
                             fontSize: 11,
                             color: gray600,

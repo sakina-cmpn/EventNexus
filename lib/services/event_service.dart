@@ -7,6 +7,9 @@ import 'dart:math';
 class EventService {
   // Get Supabase client instance
   static final _supabase = Supabase.instance.client;
+  static String? _lastErrorMessage;
+
+  static String? get lastErrorMessage => _lastErrorMessage;
 
   /// Fetch all events from the events table
   ///
@@ -44,28 +47,54 @@ class EventService {
     required String userEmail,
     required String userName,
   }) async {
+    _lastErrorMessage = null;
     try {
+      if (eventId.trim().isEmpty || userId.trim().isEmpty) {
+        _lastErrorMessage = 'Missing event or user identifier.';
+        return false;
+      }
+
       // Check if user is already registered for this event
-      final existingRegistration = await _supabase
-          .from('registrations')
-          .select()
-          .eq('user_id', userId)
-          .eq('event_id', eventId);
+      List<dynamic> existingRegistration;
+      try {
+        existingRegistration = await _supabase
+            .from('registrations')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('event_id', eventId)
+            .limit(1);
+      } catch (_) {
+        existingRegistration = await _supabase
+            .from('registrations')
+            .select('id')
+            .eq('userId', userId)
+            .eq('eventId', eventId)
+            .limit(1);
+      }
 
       if (existingRegistration.isNotEmpty) {
+        _lastErrorMessage = 'Already registered for this event.';
         print('User already registered for this event');
         return false;
       }
 
       // Check if seats are still available
-      final eventData = await _supabase
-          .from('events')
-          .select('seats_left')
-          .eq('id', eventId)
-          .single();
+      int? seatsLeft;
+      try {
+        final eventData = await _supabase
+            .from('events')
+            .select('seats_left, seatsLeft')
+            .eq('id', eventId)
+            .single();
+        seatsLeft =
+            (eventData['seats_left'] as num?)?.toInt() ??
+            (eventData['seatsLeft'] as num?)?.toInt();
+      } catch (_) {
+        // If seats column is missing in schema, skip this pre-check.
+      }
 
-      final seatsLeft = (eventData['seats_left'] as num?)?.toInt() ?? 0;
-      if (seatsLeft <= 0) {
+      if (seatsLeft != null && seatsLeft <= 0) {
+        _lastErrorMessage = 'No seats available for this event.';
         print('No seats available for this event');
         return false;
       }
@@ -73,21 +102,93 @@ class EventService {
       // Generate unique booking ID: EN-XXXXXX
       final bookingId = _generateBookingId();
 
-      // Insert registration record
-      await _supabase.from('registrations').insert({
-        'booking_id': bookingId,
-        'user_id': userId,
-        'event_id': eventId,
-        'user_email': userEmail,
-        'user_name': userName,
-      });
+      final emailValue = userEmail.trim();
+      final nameValue = userName.trim();
+      final nowIso = DateTime.now().toIso8601String();
 
-      // Decrease seats_left in events table using RPC function
-      await _supabase.rpc('decrease_seats', params: {'event_id': eventId});
+      final payloadVariants = <Map<String, dynamic>>[
+        {
+          'booking_id': bookingId,
+          'user_id': userId,
+          'event_id': eventId,
+          'user_email': emailValue,
+          'user_name': nameValue,
+          'registered_at': nowIso,
+          'status': 'confirmed',
+        },
+        {
+          'booking_id': bookingId,
+          'user_id': userId,
+          'event_id': eventId,
+          'user_email': emailValue,
+          'user_name': nameValue,
+        },
+        {
+          'bookingId': bookingId,
+          'userId': userId,
+          'eventId': eventId,
+          'userEmail': emailValue,
+          'userName': nameValue,
+          'registeredAt': nowIso,
+          'status': 'confirmed',
+        },
+        {
+          'booking_id': bookingId,
+          'user_id': userId,
+          'event_id': eventId,
+          'user_email': emailValue,
+          'user_name': nameValue,
+          'created_at': nowIso,
+        },
+      ];
+
+      Object? lastInsertError;
+      var inserted = false;
+      for (final payload in payloadVariants) {
+        try {
+          await _supabase.from('registrations').insert(payload).select().single();
+          inserted = true;
+          break;
+        } catch (e) {
+          lastInsertError = e;
+          print('Registration insert variant failed: $e');
+        }
+      }
+
+      if (!inserted) {
+        _lastErrorMessage = lastInsertError?.toString() ?? 'Failed to save registration.';
+        return false;
+      }
+
+      // Try to decrease seats, but keep registration successful even if seat
+      // update fails (registration row is already stored).
+      try {
+        await _supabase.rpc('decrease_seats', params: {'event_id': eventId});
+      } catch (rpcError) {
+        print('decrease_seats RPC failed: $rpcError');
+        if (seatsLeft != null && seatsLeft > 0) {
+          try {
+            try {
+              await _supabase
+                  .from('events')
+                  .update({'seats_left': seatsLeft - 1})
+                  .eq('id', eventId);
+            } catch (_) {
+              await _supabase
+                  .from('events')
+                  .update({'seatsLeft': seatsLeft - 1})
+                  .eq('id', eventId);
+            }
+          } catch (directUpdateError) {
+            print('Fallback seats_left update failed: $directUpdateError');
+          }
+        }
+      }
 
       print('Successfully registered for event with booking ID: $bookingId');
       return true;
     } catch (e) {
+      _lastErrorMessage = e.toString();
       print('Error registering for event: $e');
       return false;
     }
@@ -108,10 +209,18 @@ class EventService {
     debugPrint('[EventService] Fetching registrations for user: $userId');
 
     // Step 1: Fetch registrations for this user (simple query, no join)
-    final regsResponse = await _supabase
-        .from('registrations')
-        .select('*')
-        .eq('user_id', userId);
+    List<dynamic> regsResponse;
+    try {
+      regsResponse = await _supabase
+          .from('registrations')
+          .select('*')
+          .eq('user_id', userId);
+    } catch (_) {
+      regsResponse = await _supabase
+          .from('registrations')
+          .select('*')
+          .eq('userId', userId);
+    }
 
     debugPrint('[EventService] Raw registrations count: ${(regsResponse as List).length}');
 
@@ -124,7 +233,7 @@ class EventService {
     // (avoids issues with missing FK relationships for REST joins)
     final List<Map<String, dynamic>> result = [];
     for (final reg in regsResponse) {
-      final eventId = reg['event_id']?.toString();
+      final eventId = reg['event_id']?.toString() ?? reg['eventId']?.toString();
       if (eventId == null) continue;
       try {
         final eventResponse = await _supabase
@@ -159,12 +268,20 @@ class EventService {
           .select('event_id')
           .eq('user_id', userId);
 
-      return Set<String>.from(
-        (response as List).map((r) => r['event_id'].toString()),
-      );
+      return Set<String>.from((response as List).map((r) => r['event_id'].toString()));
     } catch (e) {
-      print('Error fetching registered event IDs: $e');
-      return {};
+      try {
+        final response = await _supabase
+            .from('registrations')
+            .select('eventId')
+            .eq('userId', userId);
+        return Set<String>.from(
+          (response as List).map((r) => r['eventId'].toString()),
+        );
+      } catch (e2) {
+        print('Error fetching registered event IDs: $e | fallback: $e2');
+        return {};
+      }
     }
   }
 
@@ -180,13 +297,23 @@ class EventService {
     required String userId,
   }) async {
     try {
-      final response = await _supabase
-          .from('registrations')
-          .select()
-          .eq('user_id', userId)
-          .eq('event_id', eventId);
-
-      return response.isNotEmpty;
+      try {
+        final response = await _supabase
+            .from('registrations')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('event_id', eventId)
+            .limit(1);
+        return response.isNotEmpty;
+      } catch (_) {
+        final response = await _supabase
+            .from('registrations')
+            .select('id')
+            .eq('userId', userId)
+            .eq('eventId', eventId)
+            .limit(1);
+        return response.isNotEmpty;
+      }
     } catch (e) {
       print('Error checking registration status: $e');
       return false;

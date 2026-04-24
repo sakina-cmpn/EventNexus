@@ -8,6 +8,7 @@ import 'student/main_screen.dart';
 import 'admin/admin_dashboard_screen.dart';
 import 'forgot_password_screen.dart';
 import 'email_verification_screen.dart';
+import '../config/admin_access.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -92,8 +93,8 @@ class _LoginScreenState extends State<LoginScreen>
       );
 
       if (mounted && user != null) {
-        // Check if admin email - redirect to Admin Dashboard
-        final isAdmin = user.email.toLowerCase() == 'fullsd206@gmail.com';
+        // Check admin access by email.
+        final isAdmin = AdminAccess.isAdminEmail(user.email);
 
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(

@@ -100,9 +100,13 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
     );
 
     if (mounted) {
+      final errorText = EventService.lastErrorMessage;
+      final alreadyRegistered =
+          (errorText ?? '').toLowerCase().contains('already registered');
+
       setState(() {
         _isRegistering = false;
-        if (success) _isAlreadyRegistered = true;
+        if (success || alreadyRegistered) _isAlreadyRegistered = true;
       });
       if (success) widget.onRegistrationSuccess?.call();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -110,10 +114,11 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
           content: Text(
             success
                 ? 'Successfully registered! Check your bookings.'
-                : 'Already registered for this event.',
+                : (errorText ?? 'Registration failed. Please try again.'),
           ),
-          backgroundColor:
-              success ? const Color(0xFF22c55e) : Colors.orange,
+          backgroundColor: success
+              ? const Color(0xFF22c55e)
+              : (alreadyRegistered ? Colors.orange : Colors.red),
         ),
       );
     }

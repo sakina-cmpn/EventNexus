@@ -3,10 +3,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Admin service for reading event and registration data from Supabase.
 ///
-/// NOTE: Write operations (create, update, delete) are marked as TODO
-/// for teammate to connect to actual Supabase mutations.
 class AdminService {
   static final _supabase = Supabase.instance.client;
+  static String? _lastErrorMessage;
+
+  static String? get lastErrorMessage => _lastErrorMessage;
 
   // ============================================================================
   // READ OPERATIONS (WORKING - Uses your existing Supabase tables)
@@ -189,12 +190,11 @@ class AdminService {
   }
 
   // ============================================================================
-  // WRITE OPERATIONS (TODO: Teammate to connect to Supabase)
+  // WRITE OPERATIONS
   // ============================================================================
 
   /// Create a new event
   ///
-  /// TODO: Connect to Supabase insert
   static Future<bool> createEvent({
     required String title,
     required String description,
@@ -206,37 +206,148 @@ class AdminService {
     required String imageUrl,
     String status = 'Upcoming',
   }) async {
+    _lastErrorMessage = null;
     try {
-      // TODO: Uncomment below when teammate provides write access
-      /*
-      final response = await _supabase.from('events').insert({
-        'title': title.trim(),
-        'description': description.trim(),
-        'category': category.trim(),
-        'date': date.toIso8601String(),
-        'venue': venue.trim(),
-        'price': price,
-        'total_seats': totalSeats,
-        'seats_left': totalSeats,
-        'status': status,
-        'image_url': imageUrl.trim(),
-      });
-      debugPrint('[AdminService] Event created: $title');
-      return true;
-      */
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        _lastErrorMessage = 'You must be signed in to create events.';
+        return false;
+      }
+      final userMeta = user.userMetadata ?? const <String, dynamic>{};
+      final organizerEmail =
+          (user.email ??
+                  userMeta['name'] ??
+                  userMeta['full_name'] ??
+                  userMeta['display_name'] ??
+                  'Admin')
+              .toString()
+              .trim();
+      final organizerUid = user.id.toString().trim();
 
-      // Mock success for UI demo
-      debugPrint('[AdminService] TODO: createEvent - connect to Supabase');
-      return false; // Returns false to show TODO dialog
+      final titleValue = title.trim();
+      final descriptionValue = description.trim();
+      final categoryValue = category.trim();
+      final venueValue = venue.trim();
+      final imageUrlValue = imageUrl.trim();
+      final nowIso = DateTime.now().toIso8601String();
+
+      final payloadVariants = <Map<String, dynamic>>[
+        // Preferred schema used by this app.
+        {
+          'title': titleValue,
+          'description': descriptionValue,
+          'category': categoryValue,
+          'date': date.toIso8601String(),
+          'venue': venueValue,
+          'price': price,
+          'total_seats': totalSeats,
+          'seats_left': totalSeats,
+          'status': status,
+          'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
+          'organizer': organizerEmail,
+        },
+        // Preferred schema with explicit created_at.
+        {
+          'title': titleValue,
+          'description': descriptionValue,
+          'category': categoryValue,
+          'date': date.toIso8601String(),
+          'venue': venueValue,
+          'price': price,
+          'total_seats': totalSeats,
+          'seats_left': totalSeats,
+          'status': status,
+          'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
+          'organizer': organizerEmail,
+          'created_at': nowIso,
+        },
+        // Same schema using auth uid as organizer (some RLS policies use auth.uid()).
+        {
+          'title': titleValue,
+          'description': descriptionValue,
+          'category': categoryValue,
+          'date': date.toIso8601String(),
+          'venue': venueValue,
+          'price': price,
+          'total_seats': totalSeats,
+          'seats_left': totalSeats,
+          'status': status,
+          'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
+          'organizer': organizerUid,
+        },
+        // uid organizer with explicit created_at.
+        {
+          'title': titleValue,
+          'description': descriptionValue,
+          'category': categoryValue,
+          'date': date.toIso8601String(),
+          'venue': venueValue,
+          'price': price,
+          'total_seats': totalSeats,
+          'seats_left': totalSeats,
+          'status': status,
+          'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
+          'organizer': organizerUid,
+          'created_at': nowIso,
+        },
+        // Same schema without organizer (if that column is absent).
+        {
+          'title': titleValue,
+          'description': descriptionValue,
+          'category': categoryValue,
+          'date': date.toIso8601String(),
+          'venue': venueValue,
+          'price': price,
+          'total_seats': totalSeats,
+          'seats_left': totalSeats,
+          'status': status,
+          'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
+        },
+        // Same schema without organizer with explicit created_at.
+        {
+          'title': titleValue,
+          'description': descriptionValue,
+          'category': categoryValue,
+          'date': date.toIso8601String(),
+          'venue': venueValue,
+          'price': price,
+          'total_seats': totalSeats,
+          'seats_left': totalSeats,
+          'status': status,
+          'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
+          'created_at': nowIso,
+        },
+      ];
+
+      Object? lastInsertError;
+      for (final payload in payloadVariants) {
+        try {
+          await _supabase.from('events').insert(payload).select().single();
+          debugPrint('[AdminService] Event created: $title');
+          return true;
+        } catch (e) {
+          lastInsertError = e;
+          debugPrint('[AdminService] createEvent insert variant failed: $e');
+        }
+      }
+
+      if (lastInsertError is PostgrestException &&
+          (lastInsertError as PostgrestException).code == '42501') {
+        _lastErrorMessage =
+            'Permission denied by database policy (RLS). Ensure your admin account is authenticated and allowed to insert into events.';
+      } else {
+        _lastErrorMessage = lastInsertError?.toString();
+      }
+      return false;
     } catch (e) {
       debugPrint('[AdminService] Error creating event: $e');
+      _lastErrorMessage = e.toString();
       return false;
     }
   }
 
   /// Update an existing event
   ///
-  /// TODO: Connect to Supabase update
   static Future<bool> updateEvent({
     required String eventId,
     required String title,
@@ -249,44 +360,75 @@ class AdminService {
     required String imageUrl,
     String status = 'Upcoming',
   }) async {
+    _lastErrorMessage = null;
     try {
-      // TODO: Uncomment below when teammate provides write access
-      /*
-      final response = await _supabase
+      if (eventId.trim().isEmpty) {
+        _lastErrorMessage = 'Missing event id';
+        return false;
+      }
+
+      final existing = await _supabase
           .from('events')
-          .update({
-            'title': title.trim(),
-            'description': description.trim(),
-            'category': category.trim(),
-            'date': date.toIso8601String(),
-            'venue': venue.trim(),
-            'price': price,
-            'total_seats': totalSeats,
-            'status': status,
-            'image_url': imageUrl.trim(),
-          })
-          .eq('id', eventId);
+          .select('total_seats, seats_left')
+          .eq('id', eventId)
+          .single();
 
-      debugPrint('[AdminService] Event updated: $title');
-      return true;
-      */
+      final oldTotal = (existing['total_seats'] as num?)?.toInt() ?? 0;
+      final oldSeatsLeft = (existing['seats_left'] as num?)?.toInt() ?? 0;
+      final bookedSeats = (oldTotal - oldSeatsLeft).clamp(0, oldTotal).toInt();
+      final newSeatsLeft = (totalSeats - bookedSeats).clamp(0, totalSeats).toInt();
 
-      // Mock success for UI demo
-      debugPrint('[AdminService] TODO: updateEvent - connect to Supabase');
-      return false; // Returns false to show TODO dialog
+      final titleValue = title.trim();
+      final descriptionValue = description.trim();
+      final categoryValue = category.trim();
+      final venueValue = venue.trim();
+      final imageUrlValue = imageUrl.trim();
+
+      final payloadVariants = <Map<String, dynamic>>[
+        {
+          'title': titleValue,
+          'description': descriptionValue,
+          'category': categoryValue,
+          'date': date.toIso8601String(),
+          'venue': venueValue,
+          'price': price,
+          'total_seats': totalSeats,
+          'seats_left': newSeatsLeft,
+          'status': status,
+          'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
+        },
+      ];
+
+      Object? lastUpdateError;
+      for (final payload in payloadVariants) {
+        try {
+          await _supabase
+              .from('events')
+              .update(payload)
+              .eq('id', eventId)
+              .select()
+              .single();
+          debugPrint('[AdminService] Event updated: $title');
+          return true;
+        } catch (e) {
+          lastUpdateError = e;
+          debugPrint('[AdminService] updateEvent variant failed: $e');
+        }
+      }
+
+      _lastErrorMessage = lastUpdateError?.toString();
+      return false;
     } catch (e) {
       debugPrint('[AdminService] Error updating event: $e');
+      _lastErrorMessage = e.toString();
       return false;
     }
   }
 
   /// Delete an event
   ///
-  /// TODO: Connect to Supabase delete
   static Future<bool> deleteEvent(String eventId) async {
     try {
-      // TODO: Uncomment below when teammate provides write access
-      /*
       // First delete all registrations for this event
       await _supabase.from('registrations').delete().eq('event_id', eventId);
 
@@ -295,11 +437,6 @@ class AdminService {
 
       debugPrint('[AdminService] Event deleted: $eventId');
       return true;
-      */
-
-      // Mock success for UI demo
-      debugPrint('[AdminService] TODO: deleteEvent - connect to Supabase');
-      return false; // Returns false to show TODO dialog
     } catch (e) {
       debugPrint('[AdminService] Error deleting event: $e');
       return false;
