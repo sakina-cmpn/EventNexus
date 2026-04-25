@@ -25,6 +25,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _venueController;
+  late TextEditingController _organizerController;
   late TextEditingController _priceController;
   late TextEditingController _totalSeatsController;
   late TextEditingController _imageUrlController;
@@ -52,6 +53,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     _titleController = TextEditingController(text: event?['title'] ?? '');
     _descriptionController = TextEditingController(text: event?['description'] ?? '');
     _venueController = TextEditingController(text: event?['venue'] ?? '');
+    _organizerController = TextEditingController(text: event?['organizer'] ?? '');
     _priceController = TextEditingController(text: event?['price']?.toString() ?? '');
     _totalSeatsController = TextEditingController(text: event?['total_seats']?.toString() ?? '');
     _imageUrlController = TextEditingController(text: event?['image_url'] ?? '');
@@ -73,6 +75,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _venueController.dispose();
+    _organizerController.dispose();
     _priceController.dispose();
     _totalSeatsController.dispose();
     _imageUrlController.dispose();
@@ -152,6 +155,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             category: _selectedCategory,
             date: eventDateTime,
             venue: _venueController.text.trim(),
+            organizer: _organizerController.text.trim(),
             price: num.tryParse(_priceController.text) ?? 0,
             totalSeats: int.tryParse(_totalSeatsController.text) ?? 0,
             imageUrl: _imageUrlController.text.trim(),
@@ -163,6 +167,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             category: _selectedCategory,
             date: eventDateTime,
             venue: _venueController.text.trim(),
+            organizer: _organizerController.text.trim(),
             price: num.tryParse(_priceController.text) ?? 0,
             totalSeats: int.tryParse(_totalSeatsController.text) ?? 0,
             imageUrl: _imageUrlController.text.trim(),
@@ -412,6 +417,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       decoration: _inputDecoration('Enter venue location', Icons.location_on),
                       validator: (v) => v == null || v.trim().isEmpty
                           ? 'Venue is required'
+                          : null,
+                    ),
+                    const SizedBox(height: 20),
+
+                    _buildLabel('Organizer *'),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _organizerController,
+                      decoration: _inputDecoration('Enter organizer name', Icons.person_outline),
+                      validator: (v) => v == null || v.trim().isEmpty
+                          ? 'Organizer is required'
                           : null,
                     ),
                     const SizedBox(height: 20),

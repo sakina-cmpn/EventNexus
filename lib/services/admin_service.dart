@@ -201,6 +201,7 @@ class AdminService {
     required String category,
     required DateTime date,
     required String venue,
+    required String organizer,
     required num price,
     required int totalSeats,
     required String imageUrl,
@@ -214,7 +215,7 @@ class AdminService {
         return false;
       }
       final userMeta = user.userMetadata ?? const <String, dynamic>{};
-      final organizerEmail =
+      final fallbackOrganizer =
           (user.email ??
                   userMeta['name'] ??
                   userMeta['full_name'] ??
@@ -223,6 +224,9 @@ class AdminService {
               .toString()
               .trim();
       final organizerUid = user.id.toString().trim();
+      final organizerValue = organizer.trim().isEmpty
+          ? fallbackOrganizer
+          : organizer.trim();
 
       final titleValue = title.trim();
       final descriptionValue = description.trim();
@@ -244,7 +248,7 @@ class AdminService {
           'seats_left': totalSeats,
           'status': status,
           'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
-          'organizer': organizerEmail,
+          'organizer': organizerValue,
         },
         // Preferred schema with explicit created_at.
         {
@@ -258,7 +262,7 @@ class AdminService {
           'seats_left': totalSeats,
           'status': status,
           'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
-          'organizer': organizerEmail,
+          'organizer': organizerValue,
           'created_at': nowIso,
         },
         // Same schema using auth uid as organizer (some RLS policies use auth.uid()).
@@ -355,6 +359,7 @@ class AdminService {
     required String category,
     required DateTime date,
     required String venue,
+    required String organizer,
     required num price,
     required int totalSeats,
     required String imageUrl,
@@ -382,6 +387,7 @@ class AdminService {
       final descriptionValue = description.trim();
       final categoryValue = category.trim();
       final venueValue = venue.trim();
+      final organizerValue = organizer.trim();
       final imageUrlValue = imageUrl.trim();
 
       final payloadVariants = <Map<String, dynamic>>[
@@ -395,6 +401,7 @@ class AdminService {
           'total_seats': totalSeats,
           'seats_left': newSeatsLeft,
           'status': status,
+          'organizer': organizerValue,
           'image_url': imageUrlValue.isEmpty ? null : imageUrlValue,
         },
       ];
