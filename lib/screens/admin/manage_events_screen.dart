@@ -407,7 +407,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen>
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            price == 0 ? 'FREE' : '₹$price',
+                            price == 0 ? 'FREE' : 'Rs $price',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,

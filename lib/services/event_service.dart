@@ -320,6 +320,50 @@ class EventService {
     }
   }
 
+  /// Cancel (revoke) a user's registration for an event.
+  ///
+  /// Deletes the registration row and restores the seat count on the event.
+  ///
+  /// Parameters:
+  ///   - bookingId: The booking_id string (e.g. "EN-XXXXXX")
+  ///   - eventId: ID of the event (used to restore seats_left)
+  ///
+  /// Returns true if cancellation succeeded, false otherwise.
+  static Future<bool> cancelRegistration({
+    required String bookingId,
+    required String eventId,
+  }) async {
+    try {
+      // Delete the registration row
+      await _supabase
+          .from('registrations')
+          .delete()
+          .eq('booking_id', bookingId);
+
+      // Restore seat count — read current value then increment
+      try {
+        final eventData = await _supabase
+            .from('events')
+            .select('seats_left')
+            .eq('id', eventId)
+            .single();
+        final currentSeats = (eventData['seats_left'] as num?)?.toInt() ?? 0;
+        await _supabase
+            .from('events')
+            .update({'seats_left': currentSeats + 1})
+            .eq('id', eventId);
+      } catch (seatError) {
+        // Registration already deleted — seat restore failure is non-fatal
+        print('Could not restore seat count after cancellation: $seatError');
+      }
+
+      return true;
+    } catch (e) {
+      print('Error cancelling registration: $e');
+      return false;
+    }
+  }
+
   /// Generate a random booking ID in format: EN-XXXXXX
   ///
   /// Where X is a random uppercase alphanumeric character.

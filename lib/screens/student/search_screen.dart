@@ -18,7 +18,15 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _isLoading = true;
   final Set<String> _registeredEventIds = {};
 
-  final List<String> categories = ['All', 'Workshop', 'Cultural', 'Sports', 'Hackathon'];
+  final List<String> categories = [
+    'All',
+    'Workshops',
+    'Hackathons',
+    'Cultural',
+    'Sports',
+    'Seminar',
+    'Other',
+  ];
 
   @override
   void initState() {

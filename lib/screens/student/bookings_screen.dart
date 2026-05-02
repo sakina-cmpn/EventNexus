@@ -2,6 +2,7 @@
 import 'package:flutter/services.dart';
 import '../../services/auth_service.dart';
 import '../../services/event_service.dart';
+import 'ticket_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
   final int refreshKey;
@@ -358,7 +359,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isFree ? 'Free' : '₹$price',
+                isFree ? 'Free' : 'Rs $price',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -395,15 +396,58 @@ class _BookingsScreenState extends State<BookingsScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          // View Ticket button
+          GestureDetector(
+            onTap: () => _showTicket(booking),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1a1a2e),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.confirmation_num_rounded,
+                    size: 15,
+                    color: Colors.white,
+                  ),
+                  SizedBox(width: 7),
+                  Text(
+                    'View Ticket',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     ),
     );
   }
 
+  void _showTicket(Map<String, dynamic> booking) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TicketScreen(booking: booking),
+      ),
+    );
+  }
+
   void _showBookingDetails(Map<String, dynamic> booking) {
     final event = (booking['events'] as Map<String, dynamic>?) ?? {};
     final bookingId = booking['booking_id']?.toString() ?? 'N/A';
+    final eventId = booking['event_id']?.toString() ?? booking['eventId']?.toString() ?? '';
     final registeredAt = booking['created_at']?.toString() ?? '';
     final title = event['title']?.toString() ?? 'Event';
     final category = event['category']?.toString() ?? '';
@@ -639,50 +683,109 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     top: BorderSide(color: gray400.withOpacity(0.15)),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Entry Fee',
-                          style: TextStyle(fontSize: 11, color: gray400),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Entry Fee',
+                              style: TextStyle(fontSize: 11, color: gray400),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              isFree ? 'Free' : 'Rs $price',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: isFree ? const Color(0xFF22c55e) : darkNavy,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          isFree ? 'Free' : '₹$price',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: isFree ? const Color(0xFF22c55e) : darkNavy,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFdcfce7),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.check_circle_rounded,
+                                  size: 16, color: Color(0xFF16a34a)),
+                              SizedBox(width: 6),
+                              Text(
+                                'You\'re Registered',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF16a34a),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFdcfce7),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.check_circle_rounded,
-                              size: 16, color: Color(0xFF16a34a)),
-                          SizedBox(width: 6),
-                          Text(
-                            'You\'re Registered',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF16a34a),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        // View Ticket button
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _showTicket(booking);
+                            },
+                            icon: const Icon(Icons.confirmation_num_rounded,
+                                size: 15),
+                            label: const Text('View Ticket'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: darkNavy,
+                              side: const BorderSide(color: darkNavy, width: 1),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 10),
+                        // Cancel Registration button
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _confirmCancel(
+                                context, bookingId, eventId, title),
+                            icon: const Icon(Icons.cancel_outlined, size: 15),
+                            label: const Text('Cancel'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFFDC2626),
+                              side: const BorderSide(
+                                  color: Color(0xFFDC2626), width: 1),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -691,6 +794,77 @@ class _BookingsScreenState extends State<BookingsScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _confirmCancel(
+      BuildContext context, String bookingId, String eventId, String title) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Cancel Registration',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1a1a2e),
+            fontSize: 17,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to cancel your registration for "$title"? This cannot be undone.',
+          style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text(
+              'Keep it',
+              style: TextStyle(
+                color: Color(0xFF1a1a2e),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext); // close dialog
+              Navigator.pop(context); // close bottom sheet
+              final success = await EventService.cancelRegistration(
+                bookingId: bookingId,
+                eventId: eventId,
+              );
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Registration cancelled successfully.'
+                          : 'Failed to cancel registration. Please try again.',
+                    ),
+                    backgroundColor:
+                        success ? const Color(0xFFDC2626) : Colors.grey[700],
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+                if (success) _loadBookings();
+              }
+            },
+            child: const Text(
+              'Yes, Cancel',
+              style: TextStyle(
+                color: Color(0xFFDC2626),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

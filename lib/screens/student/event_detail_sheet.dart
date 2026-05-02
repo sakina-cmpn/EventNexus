@@ -345,7 +345,7 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
                       )
                     else
                       Text(
-                        '₹$price',
+                        'Rs $price',
                         style: const TextStyle(
                           color: darkNavy,
                           fontSize: 18,

@@ -132,6 +132,71 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
+  Future<void> _confirmDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
+            SizedBox(width: 10),
+            Text('Delete Event'),
+          ],
+        ),
+        content: const Text(
+          'This will permanently delete the event and all its registrations. This action cannot be undone.',
+          style: TextStyle(fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final eventId = (widget.eventData?['id'] ?? '').toString();
+    if (eventId.isEmpty) return;
+
+    setState(() => _isSubmitting = true);
+    final success = await AdminService.deleteEvent(eventId);
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
+    if (success) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Event deleted successfully.'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to delete event. Please try again.'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -258,9 +323,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           if (isEdit)
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              onPressed: () {
-                // TODO: Delete functionality
-              },
+              onPressed: () => _confirmDelete(context),
               color: Colors.white,
             ),
         ],
@@ -439,7 +502,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel('Price (Ã¢â€šÂ¹)'),
+                              _buildLabel('Price (Rs)'),
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: _priceController,

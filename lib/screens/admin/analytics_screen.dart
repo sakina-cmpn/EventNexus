@@ -52,7 +52,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         final status = (event['status']?.toString() ?? 'Upcoming');
 
         if (price > 0) {
-          totalRevenue += price * (totalSeats - seatsLeft);
+          final registrations = (totalSeats - seatsLeft).clamp(0, totalSeats);
+          totalRevenue += price * registrations;
         }
 
         statusCount[status] = (statusCount[status] ?? 0) + 1;
@@ -189,7 +190,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           ),
           const SizedBox(height: 20),
           Text(
-            '₹$_totalRevenue',
+            'Rs $_totalRevenue',
             style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,

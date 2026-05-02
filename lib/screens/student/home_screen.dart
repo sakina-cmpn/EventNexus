@@ -24,6 +24,8 @@ class _HomeScreenState extends State<HomeScreen> {
     'Hackathons',
     'Cultural',
     'Sports',
+    'Seminar',
+    'Other',
   ];
 
   @override
@@ -55,13 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Map<String, dynamic>> get _filteredEvents {
     if (_selectedCategory == 'All') return _events;
-    return _events.where((event) {
-      final category = event['category'].toString().toLowerCase();
-      final selected = _selectedCategory.toLowerCase();
-      return category == selected ||
-          '${category}s' == selected ||
-          category == '${selected}s';
-    }).toList();
+    return _events
+        .where((event) => event['category']?.toString() == _selectedCategory)
+        .toList();
   }
 
   Color _getCategoryBadgeColor(String category) {
@@ -119,15 +117,46 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )
                   : _filteredEvents.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(40),
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 60, horizontal: 32),
                           child: Center(
-                            child: Text(
-                              'No events found',
-                              style: TextStyle(
-                                color: Color(0xFF9CA3AF),
-                                fontSize: 16,
-                              ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEFF6FF),
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  child: const Icon(
+                                    Icons.event_busy_outlined,
+                                    size: 48,
+                                    color: Color(0xFF2563EB),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                const Text(
+                                  'No events found',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF1a1a2e),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _selectedCategory == 'All'
+                                      ? 'Check back later for upcoming events.'
+                                      : 'No events in the "$_selectedCategory" category yet.',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF9CA3AF),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         )
@@ -552,7 +581,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
                 else
                   Text(
-                    '₹${event['price']} · ${event['seats']} seats',
+                    'Rs ${event['price']} · ${event['seats']} seats',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF6B7280),
